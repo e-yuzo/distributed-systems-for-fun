@@ -1,54 +1,47 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package ds.tcp.introduction.thread_classes;
 
 import java.net.*;
 import java.io.*;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
- * @author a1354698
+ * @author yuzo
  */
 public class ThreadClient {
 
     public static void main(String args[]) {
 
-        Socket clientSocket = null;
+        Socket clientSocket;
         int serverPort = 6666;
-        InetAddress serverAddr = null;
-        DataOutputStream output = null;
-        DataInputStream input = null;
+        InetAddress serverAddr;
+        DataOutputStream output;
+        DataInputStream input;
 
         try {
             serverAddr = InetAddress.getByName("127.0.0.1");
             clientSocket = new Socket(serverAddr, serverPort);
             output = new DataOutputStream(clientSocket.getOutputStream());
             input = new DataInputStream(clientSocket.getInputStream());
-            TCPClientSender clientSender = new TCPClientSender(clientSocket, input, output);
-            clientSender.start();
-            TCPClientReceiver clientReceiver = new TCPClientReceiver(clientSocket, input, output);
-            clientReceiver.start();
+            new Thread(new TCPClientSender(clientSocket, input, output)).start();
+            new Thread(new TCPClientReceiver(clientSocket, input, output)).start();
         } catch (UnknownHostException ex) {
-            Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("UHE: " + ex.getMessage());
         } catch (IOException ex) {
-            Logger.getLogger(ThreadClient.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("IOE: " + ex.getMessage());
         }
     }
 }
 
-class TCPClientSender extends Thread {
+class TCPClientSender implements Runnable{
 
     DataInputStream in;
     DataOutputStream out;
     Socket clientSocket;
 
-    public TCPClientSender(Socket clientSocket, DataInputStream in, DataOutputStream out) {
+    public TCPClientSender(Socket clientSocket, DataInputStream in
+            , DataOutputStream out) {
         this.clientSocket = clientSocket;
         this.in = in;
         this.out = out;
@@ -67,7 +60,7 @@ class TCPClientSender extends Thread {
                 }
             }
         } catch (IOException ex) {
-            Logger.getLogger(TCPClientSender.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("IOE: " + ex.getMessage());
         } finally {
             try {
                 in.close();
@@ -81,13 +74,14 @@ class TCPClientSender extends Thread {
     }
 }
 
-class TCPClientReceiver extends Thread {
+class TCPClientReceiver implements Runnable {
 
     DataInputStream in;
     DataOutputStream out;
     Socket clientSocket;
 
-    public TCPClientReceiver(Socket clientSocket, DataInputStream in, DataOutputStream out) {
+    public TCPClientReceiver(Socket clientSocket, DataInputStream in
+            , DataOutputStream out) {
         this.clientSocket = clientSocket;
         this.in = in;
         this.out = out;
@@ -105,7 +99,7 @@ class TCPClientReceiver extends Thread {
                 }
             }
         } catch (IOException ex) {
-            Logger.getLogger(TCPClientSender.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("IOE: " + ex.getMessage());
         } finally {
             try {
                 in.close();

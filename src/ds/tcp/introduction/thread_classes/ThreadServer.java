@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package ds.tcp.introduction.thread_classes;
 
 import java.net.*;
@@ -11,7 +7,7 @@ import java.util.Scanner;
 
 /**
  *
- * @author a1354698
+ * @author yuzo
  */
 public class ThreadServer {
 
@@ -23,10 +19,8 @@ public class ThreadServer {
                 System.out.println("Waiting for connections...");
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Client Accepted...");
-                ThreadServerReceiver threadReceiver = new ThreadServerReceiver(clientSocket);
-                ThreadServerSender threadSender = new ThreadServerSender(clientSocket);
-                threadReceiver.start();
-                threadSender.start();
+                new Thread(new ThreadServerReceiver(clientSocket)).start();
+                new Thread(new ThreadServerSender(clientSocket)).start();
             }
         } catch (IOException e) {
             System.out.println("Server socket: " + e.getMessage());
@@ -34,7 +28,7 @@ public class ThreadServer {
     }
 }
 
-class ThreadServerReceiver extends Thread {
+class ThreadServerReceiver implements Runnable {
 
     DataInputStream input;
     DataOutputStream output;
@@ -79,7 +73,7 @@ class ThreadServerReceiver extends Thread {
     }
 }
 
-class ThreadServerSender extends Thread {
+class ThreadServerSender implements Runnable {
 
     DataInputStream input;
     DataOutputStream output;
@@ -108,7 +102,7 @@ class ThreadServerSender extends Thread {
                 }
             }
         } catch (EOFException eofe) {
-            System.out.println("EOF: " + eofe.getMessage());
+            System.out.println("EOFE: " + eofe.getMessage());
         } catch (IOException ioe) {
             System.out.println("IOE: " + ioe.getMessage());
         } finally {
