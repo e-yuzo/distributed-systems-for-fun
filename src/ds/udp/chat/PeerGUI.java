@@ -1,5 +1,9 @@
-
-package ds.tcp.introduction.gui_classes;
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package ds.udp.chat;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -9,6 +13,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -22,18 +28,19 @@ import javax.swing.JTextField;
  *
  * @author yuzo
  */
-public class GUIClientEvolved {
+public class PeerGUI {
 
-    String appName = "I Did Not Steal This Interface, I Think I Borrowed It.";
-    GUIClientEvolved mainGUI;
-    JFrame newFrame = new JFrame(appName);
-    JButton sendMessage;
-    JTextField messageField;
-    JTextArea chatBox;
-    JTextField usernameField;
-    JFrame preFrame;
-    JLabel usernameLabel;
-    String username = Long.toString(Thread.currentThread().getId());
+    public String appName = "I Did Not Steal This Interface, I Think I Borrowed It.";
+    public PeerGUI mainGUI;
+    public JFrame newFrame = new JFrame(appName);
+    public JButton sendMessage;
+    public JTextField messageField;
+    public JTextArea chatBox;
+    public JTextField usernameField;
+    public JFrame preFrame;
+    public JLabel usernameLabel;
+    public String username = Long.toString(Thread.currentThread().getId());
+    public DataOutputStream outputStream;
 
     public void preDisplay() {
         newFrame.setVisible(false);
@@ -61,6 +68,10 @@ public class GUIClientEvolved {
         preFrame.setSize(300, 300);
         preFrame.setLocationRelativeTo(null);
         preFrame.setVisible(true);
+    }
+    
+    public void setOutputStream(DataOutputStream outputStream) {
+        this.outputStream = outputStream;
     }
 
     public void display() {
@@ -118,10 +129,24 @@ public class GUIClientEvolved {
             } else if (messageField.getText().equals(".clear")) {
                 chatBox.setText("Cleared all messages\n");
                 messageField.setText("");
+            } else if (messageField.getText().equals("SAIR")) {
+                try {
+                    //in.close();
+                    outputStream.close();
+                    //clientSocket.close();
+                    System.exit(0);
+                } catch (IOException ex) {
+                    System.out.println("IOE: " + ex.getMessage());
+                }
             } else {
-                chatBox.append("<" + username + ">:  " + messageField.getText()
-                        + "\n");
-                messageField.setText("");
+                try {
+                    chatBox.append("<" + username + ">:  " + messageField.getText()
+                            + "\n");
+                    outputStream.writeUTF(messageField.getText());
+                    messageField.setText("");
+                } catch (IOException ex) {
+                    System.out.println("IOE: " + ex.getMessage());
+                }
             }
             messageField.requestFocusInWindow();
         }

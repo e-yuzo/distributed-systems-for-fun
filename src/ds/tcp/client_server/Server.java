@@ -1,5 +1,5 @@
 
-package ds.tcp.introduction.thread_classes;
+package ds.tcp.client_server;
 
 import java.net.*;
 import java.io.*;
@@ -9,7 +9,7 @@ import java.util.Scanner;
  *
  * @author yuzo
  */
-public class ThreadServer {
+public class Server {
 
     public static void main(String args[]) {
         try {

@@ -1,19 +1,19 @@
 
-package ds.tcp.introduction.thread_classes;
+package ds.tcp.client_server;
 
-import ds.tcp.introduction.gui_classes.GUIClientEvolved;
 import java.net.*;
 import java.io.*;
 import java.util.Scanner;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  *
  * @author yuzo
+ * Description: fazer um código para o Cliente e Servidor se comunicarem. O
+ * cliente envia e recebe mensagens. O servidor envia e recebe mensagens. Quando
+ * algum dos dois enviar 'SAIR', a comunicação entre eles deve ser finalizada.
+ * Use o TCP.
  */
-public class ThreadClientGUI {
+public class Client {
 
     public static void main(String args[]) {
 
@@ -28,26 +28,8 @@ public class ThreadClientGUI {
             clientSocket = new Socket(serverAddr, serverPort);
             output = new DataOutputStream(clientSocket.getOutputStream());
             input = new DataInputStream(clientSocket.getInputStream());
-
-            //setLookAndFeel();
-            SwingUtilities.invokeLater(() -> {
-                try {
-                    UIManager.setLookAndFeel(UIManager
-                            .getSystemLookAndFeelClassName());
-                } catch (ClassNotFoundException
-                        | InstantiationException
-                        | IllegalAccessException
-                        | UnsupportedLookAndFeelException ex) {
-                    System.out.println("LAF: " + ex.getMessage());
-                }
-                GUIClientEvolved clientGUI = new GUIClientEvolved();
-                clientGUI.display();
-                new Thread(new TCPClientSenderGUI(clientSocket, input, output,
-                        clientGUI)).start();
-                new Thread(new TCPClientReceiverGUI(clientSocket, input, output,
-                        clientGUI)).start();
-            });
-
+            new Thread(new TCPClientSender(clientSocket, input, output)).start();
+            new Thread(new TCPClientReceiver(clientSocket, input, output)).start();
         } catch (UnknownHostException ex) {
             System.out.println("UHE: " + ex.getMessage());
         } catch (IOException ex) {
@@ -56,19 +38,17 @@ public class ThreadClientGUI {
     }
 }
 
-class TCPClientSenderGUI implements Runnable {
+class TCPClientSender implements Runnable{
 
     DataInputStream in;
     DataOutputStream out;
     Socket clientSocket;
-    GUIClientEvolved gui;
 
-    public TCPClientSenderGUI(Socket clientSocket, DataInputStream in,
-            DataOutputStream out, GUIClientEvolved gui) {
+    public TCPClientSender(Socket clientSocket, DataInputStream in
+            , DataOutputStream out) {
         this.clientSocket = clientSocket;
         this.in = in;
         this.out = out;
-        this.gui = gui;
     }
 
     @Override
@@ -84,8 +64,7 @@ class TCPClientSenderGUI implements Runnable {
                 }
             }
         } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(TCPClientSenderGUI.class
-                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            System.out.println("IOE: " + ex.getMessage());
         } finally {
             try {
                 in.close();
@@ -99,19 +78,17 @@ class TCPClientSenderGUI implements Runnable {
     }
 }
 
-class TCPClientReceiverGUI implements Runnable {
+class TCPClientReceiver implements Runnable {
 
     DataInputStream in;
     DataOutputStream out;
     Socket clientSocket;
-    GUIClientEvolved gui;
 
-    public TCPClientReceiverGUI(Socket clientSocket, DataInputStream in,
-            DataOutputStream out, GUIClientEvolved gui) {
+    public TCPClientReceiver(Socket clientSocket, DataInputStream in
+            , DataOutputStream out) {
         this.clientSocket = clientSocket;
         this.in = in;
         this.out = out;
-        this.gui = gui;
     }
 
     @Override
@@ -126,8 +103,7 @@ class TCPClientReceiverGUI implements Runnable {
                 }
             }
         } catch (IOException ex) {
-            java.util.logging.Logger.getLogger(TCPClientReceiver.class
-                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            System.out.println("IOE: " + ex.getMessage());
         } finally {
             try {
                 in.close();

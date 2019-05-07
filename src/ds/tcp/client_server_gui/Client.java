@@ -1,15 +1,18 @@
 
-package ds.tcp.introduction.thread_classes;
+package ds.tcp.client_server_gui;
 
 import java.net.*;
 import java.io.*;
 import java.util.Scanner;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  *
  * @author yuzo
  */
-public class ThreadClient {
+public class Client {
 
     public static void main(String args[]) {
 
@@ -24,8 +27,25 @@ public class ThreadClient {
             clientSocket = new Socket(serverAddr, serverPort);
             output = new DataOutputStream(clientSocket.getOutputStream());
             input = new DataInputStream(clientSocket.getInputStream());
-            new Thread(new TCPClientSender(clientSocket, input, output)).start();
-            new Thread(new TCPClientReceiver(clientSocket, input, output)).start();
+
+            //setLookAndFeel();
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    UIManager.setLookAndFeel(UIManager
+                            .getSystemLookAndFeelClassName());
+                } catch (ClassNotFoundException
+                        | InstantiationException
+                        | IllegalAccessException
+                        | UnsupportedLookAndFeelException ex) {
+                    System.out.println("LAF: " + ex.getMessage());
+                }
+                ClientGUI clientGUI = new ClientGUI();
+                clientGUI.display();
+                new Thread(new TCPClientSenderGUI(clientSocket, input, output,
+                        clientGUI)).start();
+                //new Thread(new TCPClientReceiverGUI(clientSocket, input, output,
+                        //clientGUI)).start();
+            });
         } catch (UnknownHostException ex) {
             System.out.println("UHE: " + ex.getMessage());
         } catch (IOException ex) {
@@ -34,69 +54,30 @@ public class ThreadClient {
     }
 }
 
-class TCPClientSender implements Runnable{
+class TCPClientSenderGUI implements Runnable {
 
     DataInputStream in;
     DataOutputStream out;
     Socket clientSocket;
+    ClientGUI gui;
 
-    public TCPClientSender(Socket clientSocket, DataInputStream in
-            , DataOutputStream out) {
+    public TCPClientSenderGUI(Socket clientSocket, DataInputStream in,
+            DataOutputStream out, ClientGUI gui) {
         this.clientSocket = clientSocket;
         this.in = in;
         this.out = out;
+        this.gui = gui;
     }
 
     @Override
     public void run() {
         Scanner reader = new Scanner(System.in);
-        String buffer;
-        try {
-            while (true) {
-                buffer = reader.nextLine();
-                out.writeUTF(buffer);
-                if (buffer.equals("SAIR")) {
-                    break;
-                }
-            }
-        } catch (IOException ex) {
-            System.out.println("IOE: " + ex.getMessage());
-        } finally {
-            try {
-                in.close();
-                out.close();
-                clientSocket.close();
-                System.exit(0);
-            } catch (IOException ioe) {
-                System.err.println("IOE: " + ioe);
-            }
-        }
-    }
-}
-
-class TCPClientReceiver implements Runnable {
-
-    DataInputStream in;
-    DataOutputStream out;
-    Socket clientSocket;
-
-    public TCPClientReceiver(Socket clientSocket, DataInputStream in
-            , DataOutputStream out) {
-        this.clientSocket = clientSocket;
-        this.in = in;
-        this.out = out;
-    }
-
-    @Override
-    public void run() {
+        gui.setOutputStream(out);
         try {
             String buffer;
             while (true) {
                 buffer = in.readUTF();
-                System.out.println(buffer);
-                if (buffer.equals("SAIR")) {
-                    break;
-                }
+                gui.chatBox.append("<" + "Anonymous" + ">:  " + buffer + "\n");
             }
         } catch (IOException ex) {
             System.out.println("IOE: " + ex.getMessage());
@@ -112,3 +93,24 @@ class TCPClientReceiver implements Runnable {
         }
     }
 }
+/*
+class TCPClientReceiverGUI implements Runnable {
+
+    DataInputStream in;
+    DataOutputStream out;
+    Socket clientSocket;
+    ClientGUI gui;
+
+    public TCPClientReceiverGUI(Socket clientSocket, DataInputStream in,
+            DataOutputStream out, ClientGUI gui) {
+        this.clientSocket = clientSocket;
+        this.in = in;
+        this.out = out;
+        this.gui = gui;
+    }
+
+    @Override
+    public void run() {
+
+    }
+}*/

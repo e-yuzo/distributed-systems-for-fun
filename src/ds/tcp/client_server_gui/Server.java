@@ -1,9 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package ds.tcp.introduction.thread_classes;
+
+package ds.tcp.client_server_gui;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -18,7 +14,7 @@ import java.util.List;
  *
  * @author yuzo
  */
-public class ThreadServerGUI {
+public class Server {
 
     public static void main(String args[]) {
         try {
@@ -31,6 +27,7 @@ public class ThreadServerGUI {
                 System.out.println("Client Accepted...");
                 new Thread(new ThreadServerManager(clientSocket, establishedSockets)).start();
                 establishedSockets.addSocket(clientSocket);
+                
             }
         } catch (IOException e) {
             System.out.println("Server socket: " + e.getMessage());
@@ -56,9 +53,12 @@ class EstablishedSockets {
         return this.socket;
     }
 
-    public void removeSocket(Socket socket) {
+    public void removeSocket(Socket socket) {//modificar para remover se um socket foi closed
+        //verificar com o método isClosed();
         for (Socket skt : this.socket) {
-            // implementar
+            if (socket == skt) {
+                this.socket.remove(skt);
+            }
         }
     }
 }
