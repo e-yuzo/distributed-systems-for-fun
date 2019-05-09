@@ -280,6 +280,12 @@ public class ClientGUI {
                 break;
             case "DELETE": //delete //dont need
                 requestBytes[1] = (byte) (2);
+                int fileLength = message[1].getBytes().length;
+                byte[] fileStuff = new byte[1 + fileLength];
+                fileStuff[0] = (byte) (fileLength); //fileAttributes -> fileNameSize in bytes + fileNameItself
+                System.arraycopy(message[1].getBytes(), 0, fileStuff, 1, fileLength);
+                requestBytes = ByteUtils.combine(requestBytes, fileStuff);
+                
                 break;
             case "GETFILESLIST": //getfileslist // more data
                 requestBytes[1] = (byte) (3);

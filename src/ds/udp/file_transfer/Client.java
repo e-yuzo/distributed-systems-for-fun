@@ -4,8 +4,8 @@ package ds.udp.file_transfer;
 import java.net.*;
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.Scanner;
 
 /**
@@ -23,44 +23,37 @@ public class Client {
             Scanner reader = new Scanner(System.in);
 
             while (true) {
-//                System.out.println("File Path: ");
-//                String filePath = reader.nextLine();
-//                System.out.println("Dest. File Name: ");
-//                String fileName = reader.nextLine();
-//                System.out.println("Sending file:'" + filePath + "'.");
 
                 String filePath = "/home/yuzo/NetBeansProjects/pictures/";
-                System.out.println("File name: ");
-                String fileName = reader.nextLine();
-                
-                filePath += fileName;
-                //send file name
-                byte[] saveFileAs = fileName.getBytes();
+                System.out.print("File name: ");
+                String fileName = reader.nextLine().trim();
+
+                //SEND file name
+                byte[] saveFileAs = fileName.getBytes(StandardCharsets.UTF_8);
                 DatagramPacket fileStatPacket = new DatagramPacket(
                         saveFileAs, saveFileAs.length, serverAddr,
                         serverPort);
-                socket.send(fileStatPacket); //send file name
+                socket.send(fileStatPacket);
 
-                //
-                File file = new File(filePath);
+                File file = new File(filePath + fileName);
 
-                //send file size
-                byte[] filesize = ByteBuffer.allocate(1024)
+                //SEND file size
+                byte[] fileSize = ByteBuffer.allocate(1024)
                         .putInt((int) file.length()).array();
                 DatagramPacket fileSizePacket = new DatagramPacket(
-                        filesize, saveFileAs.length, serverAddr,
+                        fileSize, fileSize.length, serverAddr,
                         serverPort);
                 socket.send(fileSizePacket);
 
-                //send file
+                //SEND file content
                 byte[] fileByteArray = Files.readAllBytes(file.toPath());
                 sendFile(socket, fileByteArray, serverAddr, serverPort);
 
                 System.out.println("File sent.");
 
-                //send md5 hash
+                //SEND md5 hash
                 FileIntegrityVerification integrity = new FileIntegrityVerification(
-                        filePath);
+                        filePath + fileName);
                 byte[] md5 = integrity.getMD5(); //16 bytes
                 DatagramPacket fileMD5Packet = new DatagramPacket(
                         md5, md5.length, serverAddr,
@@ -76,12 +69,13 @@ public class Client {
         }
     }
 
+    //confirmation: if third byte is -1, then adjust index i, if it's 0 then it's all good
     public static void sendFile(DatagramSocket socket,
             byte[] fileByteArray,
             InetAddress serverAddr, int serverPort) throws IOException {
         int sequenceNumber = 0;
         boolean flag;
-
+        DatagramPacket sendPacket;
         for (int i = 0; i < fileByteArray.length; i = i + 1021) {
             sequenceNumber += 1;
             byte[] message = new byte[1024];
@@ -102,12 +96,28 @@ public class Client {
                 System.arraycopy(fileByteArray, i, message, 3, fileByteArray.length - i);//last message
             }
             
-            DatagramPacket sendPacket = new DatagramPacket(message, message.length,
+            sendPacket = new DatagramPacket(message, message.length,
                      serverAddr, serverPort);
-            byte[] newArray = Arrays.copyOfRange(message, 3, 1021);
-            //System.out.println("lol?:" + new String(newArray));
             socket.send(sendPacket);
+            
             System.out.println("Sending Packet Number: " + sequenceNumber);
+            
+            //await confirmation
+            byte[] data = new byte[3];
+            DatagramPacket receivedPacket = new DatagramPacket(
+                    data, data.length);
+            socket.receive(receivedPacket);
+            int confirmation = (int) data[2];
+            int sequenceNumberRequired;
+            if (confirmation == 0) {
+                continue;
+            } else { //adjusting variables
+                sequenceNumberRequired = ((data[0] & 0xff) << 8) + (data[1] & 0xff);
+                sequenceNumber = sequenceNumberRequired - 1; //sequnceNumber will be incremented again
+                i = (sequenceNumber * i) - 1021;
+            }
         }
     }
+    
+    
 }
