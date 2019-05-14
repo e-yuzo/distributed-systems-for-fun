@@ -28,7 +28,7 @@ Implementar um serviço de chat que possibilite:
    * solicitação de listagem de arquivos para um usuário (via UDP)
    * ex: LISTFILES [Bicho Papão]
 
-   -- FILES [arq1, arq2, arqN] 
+   -- FILES [arq1, arq2, arqN]
    * resposta para o LISTFILES (via UDP)
    * ex: FILES [lista_alunos_visitar.txt, lista_alunos_visitados.txt, arquivo_surpresa.exe]
 

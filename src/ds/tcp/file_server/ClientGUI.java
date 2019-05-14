@@ -1,5 +1,6 @@
 package ds.tcp.file_server;
 
+import utils.ByteUtils;
 import ds.tcp.request_process.FileReceiver;
 import java.awt.BorderLayout;
 import java.awt.Color;

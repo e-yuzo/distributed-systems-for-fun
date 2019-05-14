@@ -5,8 +5,7 @@
  */
 package test;
 
-import ds.tcp.file_server.ByteUtils;
-import java.nio.charset.StandardCharsets;
+import java.nio.CharBuffer;
 
 /**
  *
@@ -32,13 +31,28 @@ public class app {
 //        File folder = new File("/home/yuzo/Desktop/");
 //        int numberOfFiles = folder.listFiles().length;
 //        System.out.println(numberOfFiles);
-        byte[] before = new byte[3];
-        before[0] = (byte) 1;
-        before[1] = (byte) 2;
-        before[2] = (byte) -66;
-        System.out.println("beforeLength: " + before.length);
-        String after = new String(before, StandardCharsets.UTF_8);
-        byte[] afterBytes = after.getBytes(StandardCharsets.UTF_8);
-        System.out.println(afterBytes.length);
+
+//        byte[] before = new byte[3];
+//        before[0] = (byte) 1;
+//        before[1] = (byte) 2;
+//        before[2] = (byte) -66;
+//        System.out.println("beforeLength: " + before.length);
+//        String after = new String(before, StandardCharsets.UTF_8);
+//        byte[] afterBytes = after.getBytes(StandardCharsets.UTF_8);
+//        System.out.println(afterBytes.length);
+        CharBuffer cb = CharBuffer.allocate(100);
+
+        cb.put("This is a test String");
+        cb.flip();
+        char[] h = cb.array();
+        for (char c : h) {
+            System.out.println(c);
+        }
+        
+
+        // This throws an IllegalArgumentException
+        //cb.put(cb);
+
+        System.out.println(cb);
     }
 }
