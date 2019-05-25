@@ -14,6 +14,11 @@ import java.nio.CharBuffer;
 public class app {
 
     public static void main(String[] args) {
+        String s = "hi there hi there";
+        String[] h = s.split(" ");
+        String str = String.join(" ", h);
+        System.out.println(str);
+        
         //String s = "qwdqwd";
         //System.out.println(s.substring(0, s.length()));
         //System.out.println(s.getBytes().length);
@@ -40,19 +45,19 @@ public class app {
 //        String after = new String(before, StandardCharsets.UTF_8);
 //        byte[] afterBytes = after.getBytes(StandardCharsets.UTF_8);
 //        System.out.println(afterBytes.length);
-        CharBuffer cb = CharBuffer.allocate(100);
-
-        cb.put("This is a test String");
-        cb.flip();
-        char[] h = cb.array();
-        for (char c : h) {
-            System.out.println(c);
+//        CharBuffer cb = CharBuffer.allocate(100);
+//
+//        cb.put("This is a test String");
+//        cb.flip();
+//        char[] h = cb.array();
+//        for (char c : h) {
+//            System.out.println(c);
         }
         
 
         // This throws an IllegalArgumentException
         //cb.put(cb);
 
-        System.out.println(cb);
+//        System.out.println(cb);
     }
-}
+

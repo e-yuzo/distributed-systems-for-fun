@@ -37,7 +37,7 @@ public class Server {
             Socket clientSocket2 = serverSocket.accept();
             System.out.println("Client 2 Accepted...");
             ThreadServerManager c2 = new ThreadServerManager(clientSocket2);
-            c1.setPipes(pipeO2, pipeI2);
+            c2.setPipes(pipeO2, pipeI2);
             new Thread(c2).start();
 //                establishedSockets.addSocket(clientSocket);
         } catch (IOException e) {
@@ -60,14 +60,20 @@ class InputPipe implements Runnable {
 
     @Override
     public void run() {
-        String buffer = "";
+        String buffer;
         try {
             while (true) {
+                buffer = "";
                 int i;
-                while ((i = inputPipe.read()) != -1) {
-                    buffer += (char) i;
+                char[] cbuf = new char[1024];
+                while ((i = inputPipe.read(cbuf)) != -1) {
+                    System.out.println("Size of i: " + i);
+                    buffer = new String(cbuf, 0, i / 2);
+                    if (i < 1024) {
+                        break;
+                    }
                 }
-                System.out.println(buffer);
+                System.out.println("Reading: " + buffer);
                 outputData.writeUTF(buffer);
                 if (buffer.equals("SAIR")) {
                     break;
@@ -98,9 +104,10 @@ class OutputPipe implements Runnable {
                 for (int i = 0; i < buffer.length(); i++) {
                     outputPipe.write(buffer.charAt(i));
                 }
+                System.out.println("Writing: " + buffer);
                 outputPipe.write(buffer);
                 outputPipe.flush();
-                System.out.println(buffer);
+                //System.out.println(buffer);
                 if (buffer.equals("SAIR")) {
                     break;
                 }
