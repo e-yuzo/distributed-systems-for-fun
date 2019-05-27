@@ -453,6 +453,7 @@ public class ClientGUI {
         }
         onlineUsers.removeAll(toRemove);
     }
+    
     public boolean listeningForMulticast = false;
 
     public void setMulticastGroup() {

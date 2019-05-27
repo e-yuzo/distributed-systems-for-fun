@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+service RelevantBooks {
+    rpc SubmitBook(Book) returns (BookResponse) {}
+    rpc GetBooks(BookQuery) returns (BooksResponse) {}
+    rpc RemoveBook(Book) returns (BookResponse) {}
+}
+
+message BookQuery {
+    int32 id = 1;
+}
+
+message Book {
+    string author = 1;
+    string title = 2;
+    string book_cover = 3;
+}
+
+message BookResponse {
+    int32 response = 1;
+}
+
+message BooksResponse {
+    repeated Book books = 1;
+}

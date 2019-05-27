@@ -46,7 +46,4 @@ public class User {
     public void setPort(int port) {
         this.port = port;
     }
-    
-    
-    
 }
