@@ -1,0 +1,1 @@
+2) Fazer um sistema de upload de arquivos via UDP. Um servidor UDP deverá receber as partes dos arquivos (1024 bytes), verificar ao final a integridade via um checksum (MD5) e armazenar o arquivo em uma pasta padrão.

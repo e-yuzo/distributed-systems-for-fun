@@ -106,14 +106,14 @@ class ThreadServerSender implements Runnable {
         } catch (IOException ioe) {
             System.out.println("IOE: " + ioe.getMessage());
         } finally {
-            try {
-                this.input.close();
-                this.output.close();
-                this.serverSocket.close();
-                System.exit(0);
-            } catch (IOException ioe) {
-                System.err.println("IOE: " + ioe);
-            }
+//            try {
+////                this.input.close();
+////                this.output.close();
+////                this.serverSocket.close();
+////                System.exit(0);
+//            } catch (IOException ioe) {
+//                System.err.println("IOE: " + ioe);
+//            }
         }
         System.out.println("ThreadServerSender terminated.");
     }

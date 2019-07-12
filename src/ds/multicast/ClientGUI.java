@@ -224,24 +224,6 @@ public class ClientGUI {
         };
         Thread t = new Thread(runnable);
         t.start();
-
-//        SwingUtilities.invokeLater(() -> {
-//            try {
-//                while (true) {
-//                    byte[] buffer = new byte[2048];
-//                    DatagramPacket messageIn = new DatagramPacket(buffer, buffer.length);
-//                    ms.receive(messageIn);
-//                    String message = new String(messageIn.getData(), 0, messageIn.getLength());
-//                    System.out.println("Received: " + message);
-//                    receivedCommands(message.getBytes(), messageIn.getAddress(), messageIn.getPort());
-//                    chatBox.append("<" + "Anonymous" + ">:  " + message + "\n");
-//                }
-//            } catch (IOException e) {
-//                System.out.println(e);
-//            } catch (Exception ex) {
-//                Logger.getLogger(ClientGUI.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        });
     }
 
     /**
@@ -269,24 +251,6 @@ public class ClientGUI {
         };
         Thread t = new Thread(runnable);
         t.start();
-//        SwingUtilities.invokeLater(() -> {
-//            try {
-//                //DatagramSocket ds = new DatagramSocket(destDatagramPort); // msPort 6799
-//                while (true) {
-//                    byte[] buffer = new byte[2048];
-//                    DatagramPacket messageIn = new DatagramPacket(buffer, buffer.length);
-//                    ds.receive(messageIn);
-//                    String message = new String(messageIn.getData(), 0, messageIn.getLength());
-//                    System.out.println("Received: " + message);
-//                    receivedCommands(message.getBytes(), messageIn.getAddress(), messageIn.getPort());
-//                    chatBox.append("<" + "Whatever" + ">:  " + message + "\n");
-//                }
-//            } catch (IOException e) {
-//                System.out.println(e);
-//            } catch (Exception ex) {
-//                Logger.getLogger(ClientGUI.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        });
     }
 
     /**
@@ -300,17 +264,20 @@ public class ClientGUI {
      */
     public void receivedCommands(byte[] userInput, InetAddress addr, int port) throws Exception {
         String toString = new String(userInput, StandardCharsets.UTF_8);
+        System.out.println("RECEIVED " + toString);
         String[] splitUserInput = toString.split(" ");
         byte[] toBeSent;
         String response;
         User user;
         System.out.println("sadasd" + toString);
+        String[] splitAgain;
         switch (splitUserInput[0].toLowerCase()) {
             case "join": // send the joinack by receiving join
                 if (splitUserInput.length == 2) {
-                    response = "JOINACK " + username;
+                    response = "JOINACK [" + username + "]";
                     toBeSent = response.getBytes(StandardCharsets.UTF_8);
-                    user = new User(addr, splitUserInput[1], destDatagramPort); //using fixed port instead of received from user
+                    splitAgain = splitUserInput[1].split("\\]")[0].split("\\[");
+                    user = new User(addr, splitAgain[1], destDatagramPort); //using fixed port instead of received from user
                     onlineUsers.add(user); //maintain online user list
                     DatagramPacket ack = new DatagramPacket(toBeSent, toBeSent.length, addr, destDatagramPort); //using fixed port instead of received from user
                     chatBox.append("<" + "System" + ">:  " + toString + "\n");
@@ -321,13 +288,15 @@ public class ClientGUI {
                 break;
             case "joinack":
                 if (splitUserInput.length == 2) {
-                    user = new User(addr, splitUserInput[1], port);
+                    splitAgain = splitUserInput[1].split("\\]")[0].split("\\[");
+                    user = new User(addr, splitAgain[1], port);
                     onlineUsers.add(user);
-                    System.out.println("/**JOIN ACK RECEIVED");
+                    System.out.println("/**JOIN ACK RECEIVED" + " " + splitAgain[1]);
                     System.out.println("USER " + user.getUsername() + " ADDED**/");
                 }
                 break;
             case "msgidv":
+//                 && splitUserInput[4].equals(username)
                 if (splitUserInput.length >= 6) {
                     System.out.println("/**DIRECT MESSAGE RECEIVED**/");
                     String[] msg = new String[splitUserInput.length - 5];
@@ -344,6 +313,7 @@ public class ClientGUI {
                     chatBox.append("<" + splitUserInput[1] + " [MS]" + ">:  " + info + "\n");
                 }
             case "listfiles":
+//                 && splitUserInput[1].equals(username)
                 if (splitUserInput.length == 2) {
                     String concatFiles = "FILES [";
                     File folder = new File("/home/yuzo/NetBeansProjects/pictures/");
@@ -374,6 +344,7 @@ public class ClientGUI {
             case "downfile": // enviar downinfo e abrir conexão de acordo com a info, enviar file do 'pictures'
                 // [lista_alunos_visitar.txt, 50000, 192.168.10.2, 7777]
                 File file = new File("/home/yuzo/NetBeansProjects/pictures/" + splitUserInput[2]);
+//                 && splitUserInput[1].equals(username)
                 if (file.exists()) {
                     String info = "DOWNINFO " + "[" + file.getName() + ", " + file.length() + ", " + "127.0.0.1" + ", " + fileSharePort + "]";
                     chatBox.append("<" + "System" + ">:  " + "DOWNLOAD REQUESTED" + "\n");
@@ -476,7 +447,7 @@ public class ClientGUI {
         DatagramPacket dp;
         switch (splitUserInput[0].toLowerCase()) {
             case "join":
-                String command = splitUserInput[0].toUpperCase() + " " + username;
+                String command = splitUserInput[0].toUpperCase() + " [" + username + "]";
                 byte[] toBeSent = command.getBytes(StandardCharsets.UTF_8);
                 DatagramPacket join = new DatagramPacket(toBeSent, toBeSent.length, addr, destMsPort);
                 if (!listeningForMulticast) {
@@ -500,9 +471,9 @@ public class ClientGUI {
                     chatBox.append("<" + username + ">:  " + info + "\n");
                     commandString = splitUserInput[0].toUpperCase() + " "
                             + splitUserInput[1].toUpperCase() + " "
-                            + username + " "
+                            + "[" + username + "] "
                             + splitUserInput[3].toUpperCase() + " "
-                            + splitUserInput[4] + " " //destino
+                            + "[" + splitUserInput[4] + "] " //destino
                             + info; //texto
                     commandBytes = commandString.getBytes(StandardCharsets.UTF_8);
                     dp = new DatagramPacket(commandBytes, commandBytes.length, destUser.addr, destUser.getPort());
@@ -519,7 +490,7 @@ public class ClientGUI {
                     String info = String.join(" ", msg);
                     chatBox.append("<" + username + " [MS]" + ">:  " + info + "\n");
                     commandString = splitUserInput[0].toUpperCase() + " "
-                            + username + " "
+                            + "[" + username + "] "
                             + info;
                     commandBytes = commandString.getBytes(StandardCharsets.UTF_8);
                     dp = new DatagramPacket(commandBytes, commandBytes.length, addr, destMsPort);
@@ -529,7 +500,7 @@ public class ClientGUI {
             case "listfiles":
                 destUser = findUserByName(splitUserInput[1]);
                 if (destUser != null) {
-                    commandString = splitUserInput[0].toUpperCase() + " " + splitUserInput[1];
+                    commandString = splitUserInput[0].toUpperCase() + " [" + splitUserInput[1] + "]";
                     commandBytes = commandString.getBytes(StandardCharsets.UTF_8);
                     dp = new DatagramPacket(commandBytes, commandBytes.length, destUser.addr, destUser.getPort());
                     ds.send(dp);
@@ -543,7 +514,7 @@ public class ClientGUI {
             case "downfile": //DOWNFILE [apelido] filename UDP
                 destUser = findUserByName(splitUserInput[1]);
                 if (destUser != null) {
-                    String c = splitUserInput[0].toUpperCase() + " " + splitUserInput[1]
+                    String c = splitUserInput[0].toUpperCase() + " [" + splitUserInput[1] + "]"
                             + " " + splitUserInput[2];
                     byte[] cBytes = c.getBytes(StandardCharsets.UTF_8);
                     DatagramPacket go = new DatagramPacket(cBytes, cBytes.length, destUser.addr, destUser.getPort());
@@ -557,12 +528,11 @@ public class ClientGUI {
             case "downinfo": //not needed
                 break;
             case "leave":
-                String leave = splitUserInput[0].toUpperCase() + " " + username;
+                String leave = splitUserInput[0].toUpperCase() + " [" + username + "]";
                 byte[] leaveBytes = leave.getBytes(StandardCharsets.UTF_8);
                 DatagramPacket leavePacket = new DatagramPacket(leaveBytes, leaveBytes.length, addr, destMsPort);
                 ms.send(leavePacket);
                 ms.leaveGroup(addr);
-                System.exit(0);
                 break;
             default:
                 System.out.println("it's nothing");
